@@ -2,39 +2,53 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Phone, MessageCircle, ArrowLeft, AlertTriangle, Clock, Shield, Heart, Users, MapPin } from "lucide-react"
+import {
+  Phone,
+  MessageCircle,
+  ArrowLeft,
+  AlertTriangle,
+  Clock,
+  Shield,
+  Heart,
+  Users,
+  MapPin,
+} from "lucide-react"
 
 export default function CrisisSupportPage() {
   const handleEmergencyCall = (number: string) => {
+    // Use tel: for phone, sms: for text if needed
+    if (number.includes("/")) {
+      // pick first number if multiple are given
+      number = number.split("/")[0].trim()
+    }
     window.location.href = `tel:${number}`
   }
 
   const crisisResources = [
     {
-  name: "Vandrevala Foundation Helpline",
-  number: "1860 266 2345 / 9999 666 555",
-  description: "24/7 free mental health support (multi-lingual)",
-  type: "call",
-},
-{
-  name: "iCall (TISS Helpline)",
-  number: "9152987821",
-  description: "Free, confidential mental health counseling (call or WhatsApp)",
-  type: "call/text",
-},
-{
-  name: "AASRA",
-  number: "91-22-27546669 / 91-22-27546667",
-  description: "24/7 suicide prevention and crisis support",
-  type: "call",
-},
-{
-  name: "KIRAN Mental Health Rehabilitation Helpline (Govt. of India)",
-  number: "1800-599-0019",
-  description: "24/7 toll-free national mental health helpline",
-  type: "call",
-}
-
+      name: "Vandrevala Foundation Helpline",
+      number: "1860 266 2345",
+      description: "24/7 free mental health support (multi-lingual)",
+      type: "call",
+    },
+    {
+      name: "iCall (TISS Helpline)",
+      number: "9152987821",
+      description: "Free, confidential mental health counseling (call or WhatsApp)",
+      type: "call/text",
+    },
+    {
+      name: "AASRA",
+      number: "91-22-27546669",
+      description: "24/7 suicide prevention and crisis support",
+      type: "call",
+    },
+    {
+      name: "KIRAN Mental Health Rehabilitation Helpline (Govt. of India)",
+      number: "1800-599-0019",
+      description: "24/7 toll-free national mental health helpline",
+      type: "call",
+    },
   ]
 
   const campusResources = [
@@ -60,6 +74,7 @@ export default function CrisisSupportPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
       <header className="border-b bg-destructive/5 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
@@ -86,8 +101,12 @@ export default function CrisisSupportPage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-destructive mb-2">If you're in immediate danger</h2>
-              <p className="text-destructive/80 mb-6">Don't wait. Call emergency services right now.</p>
+              <h2 className="text-2xl font-bold text-destructive mb-2">
+                If you're in immediate danger
+              </h2>
+              <p className="text-destructive/80 mb-6">
+                Don't wait. Call emergency services right now.
+              </p>
               <Button
                 size="lg"
                 variant="destructive"
@@ -109,7 +128,9 @@ export default function CrisisSupportPage() {
                 <Phone className="w-5 h-5 text-primary" />
                 National Crisis Resources
               </h3>
-              <p className="text-muted-foreground mb-6">Free, confidential support available 24/7</p>
+              <p className="text-muted-foreground mb-6">
+                Free, confidential support available 24/7
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -145,7 +166,9 @@ export default function CrisisSupportPage() {
                 <MapPin className="w-5 h-5 text-primary" />
                 Campus Resources
               </h3>
-              <p className="text-muted-foreground mb-6">On-campus support and emergency services</p>
+              <p className="text-muted-foreground mb-6">
+                On-campus support and emergency services
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -179,8 +202,14 @@ export default function CrisisSupportPage() {
             <CardContent className="pt-6">
               <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
               <h4 className="font-semibold mb-2">AI Support Chat</h4>
-              <p className="text-sm text-muted-foreground mb-4">24/7 AI-powered emotional support</p>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/chat")}>
+              <p className="text-sm text-muted-foreground mb-4">
+                24/7 AI-powered emotional support
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => (window.location.href = "/chat")}
+              >
                 Start Chat
               </Button>
             </CardContent>
@@ -190,8 +219,14 @@ export default function CrisisSupportPage() {
             <CardContent className="pt-6">
               <Users className="w-8 h-8 text-primary mx-auto mb-3" />
               <h4 className="font-semibold mb-2">Peer Support</h4>
-              <p className="text-sm text-muted-foreground mb-4">Connect with other students</p>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/forum")}>
+              <p className="text-sm text-muted-foreground mb-4">
+                Connect with other students
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => (window.location.href = "/forum")}
+              >
                 Join Forum
               </Button>
             </CardContent>
@@ -201,8 +236,14 @@ export default function CrisisSupportPage() {
             <CardContent className="pt-6">
               <Shield className="w-8 h-8 text-primary mx-auto mb-3" />
               <h4 className="font-semibold mb-2">Professional Help</h4>
-              <p className="text-sm text-muted-foreground mb-4">Book with licensed counselors</p>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/book")}>
+              <p className="text-sm text-muted-foreground mb-4">
+                Book with licensed counselors
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => (window.location.href = "/book")}
+              >
                 Book Session
               </Button>
             </CardContent>
@@ -216,7 +257,9 @@ export default function CrisisSupportPage() {
               <Shield className="w-5 h-5 text-primary" />
               Safety Planning
             </CardTitle>
-            <CardDescription>Create a personal safety plan for crisis situations</CardDescription>
+            <CardDescription>
+              Create a personal safety plan for crisis situations
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4 text-sm">

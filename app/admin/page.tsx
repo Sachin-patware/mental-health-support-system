@@ -3,12 +3,14 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+
 import {
   Dialog,
   DialogContent,
@@ -42,7 +44,7 @@ import {
   User,
   Eye,
   MessageSquare,
-  UserPlus,
+  UserPlus, Headphones, Brain, Moon
 } from "lucide-react"
 
 interface MeditationVideo {
@@ -139,6 +141,7 @@ const mockStudents: Student[] = [
   },
 ]
 
+  
 const defaultVideos: MeditationVideo[] = [
   {
     id: "1",
@@ -178,6 +181,14 @@ const defaultVideos: MeditationVideo[] = [
   },
 ]
 
+//  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+
+
+  
+
+ 
+
 function AdminLogin({ onLogin }: { onLogin: () => void }) {
   const [credentials, setCredentials] = useState({ username: "", password: "" })
   const [error, setError] = useState("")
@@ -192,6 +203,8 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
       setError("Invalid credentials. Use admin/admin123")
     }
   }
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center p-4">
@@ -259,6 +272,72 @@ export default function AdminDashboard() {
     message: "",
     videoId: "",
   })
+    // Resource management
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newResource, setNewResource] = useState({
+    title: "",
+    description: "",
+    duration: "",
+    category: "",
+    url: "",
+  });
+  const [resources, setResources] = useState({
+    videos: defaultVideos,
+    audio: [
+    {
+      id: 1,
+      title: "Progressive Muscle Relaxation",
+      description: "Full-body relaxation technique to release tension",
+      duration: "20 min",
+      category: "Relaxation",
+    },
+    {
+      id: 2,
+      title: "Guided Morning Meditation",
+      description: "Start your day with calm and focus",
+      duration: "10 min",
+      category: "Mindfulness",
+    },
+    {
+      id: 3,
+      title: "Deep Sleep Music",
+      description: "Soothing sounds to help fall asleep faster",
+      duration: "30 min",
+      category: "Sleep",
+    },
+  ],
+
+  articles: [
+    {
+      id: 1,
+      title: "Understanding College Anxiety",
+      description: "Comprehensive guide to managing anxiety in college",
+      readTime: "8 min read",
+      category: "Anxiety",
+    },
+    {
+      id: 2,
+      title: "Building Healthy Sleep Habits",
+      description: "Evidence-based strategies for better sleep quality",
+      readTime: "6 min read",
+      category: "Sleep",
+    },
+    {
+      id: 3,
+      title: "Coping with Academic Pressure",
+      description: "Practical tips for managing study stress effectively",
+      readTime: "10 min read",
+      category: "Stress",
+    },
+    {
+      id: 4,
+      title: "Mindfulness for Students",
+      description: "How mindfulness practices can improve focus and well-being",
+      readTime: "7 min read",
+      category: "Mindfulness",
+    },
+  ],
+  });
 
   useEffect(() => {
     const adminLoggedIn = localStorage.getItem("adminLoggedIn")
@@ -280,6 +359,28 @@ export default function AdminDashboard() {
       setNotifications(JSON.parse(savedNotifications))
     }
   }, [])
+
+ const handleDeleteResource = (type: keyof typeof resources, id: number | string) => {
+    setResources(prev => ({
+      ...prev,
+      [type]: prev[type].filter(r => r.id !== id),
+    }));
+  };
+
+
+  const handleAddResource = (type: keyof typeof resources) => {
+    setResources((prev) => ({
+      ...prev,
+      [type]: [
+        ...prev[type],
+        { ...newResource, id: Date.now(), addedAt: new Date().toISOString() },
+      ],
+    }))
+    setNewResource({ title: "", description: "", duration: "", category: "", url: "" })
+    setIsAddDialogOpen(false)
+  }
+
+
 
   const handleLogout = () => {
     localStorage.removeItem("adminLoggedIn")
@@ -443,7 +544,7 @@ export default function AdminDashboard() {
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
-            <TabsTrigger value="meditation">Videos</TabsTrigger>
+            <TabsTrigger value="meditation">Resources</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="peer-support">Peer Support</TabsTrigger>
             <TabsTrigger value="crisis">Crisis</TabsTrigger>
@@ -537,23 +638,8 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 bg-transparent"
-                        onClick={() => {
-                          setNewMessage({
-                            studentId: student.id,
-                            message: `Hi ${student.name}, I wanted to check in on how you're doing. Is there anything I can help you with?`,
-                            videoId: "",
-                          })
-                          setIsSendMessageOpen(true)
-                        }}
-                      >
-                        <MessageCircle className="w-3 h-3 mr-1" />
-                        Message
-                      </Button>
+                    <div className="flex pt-2">
+                     
                       <Button
                         size="sm"
                         variant="outline"
@@ -787,142 +873,130 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="meditation" className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Meditation Videos</h3>
-                <p className="text-sm text-muted-foreground">Manage meditation resources for students</p>
+<TabsContent value="meditation" className="space-y-6">
+          <div className="min-h-screen bg-background">
+      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-xl font-bold">Admin Resources Manager</h1>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button><Plus className="w-4 h-4 mr-2" /> Add Resource</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Resource</DialogTitle>
+                <DialogDescription>Fill details of video, audio, or article.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Input
+                  placeholder="Title"
+                  value={newResource.title}
+                  onChange={(e) => setNewResource({ ...newResource, title: e.target.value })}
+                />
+                <Textarea
+                  placeholder="Description"
+                  value={newResource.description}
+                  onChange={(e) => setNewResource({ ...newResource, description: e.target.value })}
+                />
+                <Input
+                  placeholder="Duration (e.g. 10 min)"
+                  value={newResource.duration}
+                  onChange={(e) => setNewResource({ ...newResource, duration: e.target.value })}
+                />
+                <Input
+                  placeholder="Category"
+                  value={newResource.category}
+                  onChange={(e) => setNewResource({ ...newResource, category: e.target.value })}
+                />
+                <Input
+                  placeholder="URL (YouTube, link etc.)"
+                  value={newResource.url}
+                  onChange={(e) => setNewResource({ ...newResource, url: e.target.value })}
+                />
               </div>
-              <Dialog open={isAddVideoOpen} onOpenChange={setIsAddVideoOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New Video
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Add Meditation Video</DialogTitle>
-                    <DialogDescription>Add a new YouTube meditation video for students to access.</DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="title" className="text-right">
-                        Title
-                      </Label>
-                      <Input
-                        id="title"
-                        value={newVideo.title}
-                        onChange={(e) => setNewVideo({ ...newVideo, title: e.target.value })}
-                        className="col-span-3"
-                        placeholder="Video title"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="url" className="text-right">
-                        YouTube URL
-                      </Label>
-                      <Input
-                        id="url"
-                        value={newVideo.url}
-                        onChange={(e) => setNewVideo({ ...newVideo, url: e.target.value })}
-                        className="col-span-3"
-                        placeholder="https://www.youtube.com/watch?v=..."
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="duration" className="text-right">
-                        Duration
-                      </Label>
-                      <Input
-                        id="duration"
-                        value={newVideo.duration}
-                        onChange={(e) => setNewVideo({ ...newVideo, duration: e.target.value })}
-                        className="col-span-3"
-                        placeholder="10:00"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="category" className="text-right">
-                        Category
-                      </Label>
-                      <Select
-                        value={newVideo.category}
-                        onValueChange={(value) => setNewVideo({ ...newVideo, category: value })}
-                      >
-                        <SelectTrigger className="col-span-3">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Anxiety">Anxiety</SelectItem>
-                          <SelectItem value="Sleep">Sleep</SelectItem>
-                          <SelectItem value="Stress">Stress</SelectItem>
-                          <SelectItem value="Mindfulness">Mindfulness</SelectItem>
-                          <SelectItem value="Beginner">Beginner</SelectItem>
-                          <SelectItem value="Depression">Depression</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="description" className="text-right">
-                        Description
-                      </Label>
-                      <Textarea
-                        id="description"
-                        value={newVideo.description}
-                        onChange={(e) => setNewVideo({ ...newVideo, description: e.target.value })}
-                        className="col-span-3"
-                        placeholder="Brief description of the video"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleAddVideo}>Add Video</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
+              <DialogFooter>
+                <Button onClick={() => handleAddResource("videos")}>Save Video</Button>
+                <Button onClick={() => handleAddResource("audio")}>Save Audio</Button>
+                <Button onClick={() => handleAddResource("articles")}>Save Article</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </header>
 
+      <div className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="videos">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="videos">Videos</TabsTrigger>
+            <TabsTrigger value="audio">Audio</TabsTrigger>
+            <TabsTrigger value="articles">Articles</TabsTrigger>
+          </TabsList>
+
+          {/* Videos Section */}
+          <TabsContent value="videos" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video) => (
-                <Card key={video.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative">
-                    <div className="w-full h-32 bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
-                      <Play className="w-8 h-8 text-emerald-600" />
+              {resources.videos.map((video) => (
+                <Card key={video.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex justify-between">
+                      <Badge>{video.category}</Badge>
+                      <span className="text-xs text-muted-foreground">{video.duration}</span>
                     </div>
-                    <Badge className="absolute top-2 right-2 bg-black/70 text-white">{video.duration}</Badge>
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm">{video.title}</h4>
-                      <p className="text-xs text-muted-foreground">{video.description}</p>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <Badge variant="secondary">{video.category}</Badge>
-                        <span>{new Date(video.addedAt).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <Button size="sm" variant="outline" asChild className="flex-1 bg-transparent">
-                          <a href={video.url} target="_blank" rel="noopener noreferrer">
-                            <Play className="w-3 h-3 mr-1" />
-                            Watch
-                          </a>
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteVideo(video.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
+                    <CardTitle>{video.title}</CardTitle>
+                    <CardDescription>{video.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex justify-between">
+                    <Button size="sm" variant="outline" onClick={() => window.open(video.url, "_blank")}>
+                      <Play className="w-3 h-3 mr-1" /> Watch
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleDeleteResource("videos", video.id)} className="text-red-600">
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
           </TabsContent>
+
+          {/* Audio Section */}
+          <TabsContent value="audio" className="mt-6">
+            {resources.audio.map((audio) => (
+              <Card key={audio.id}>
+                <CardHeader>
+                  <CardTitle>{audio.title}</CardTitle>
+                  <CardDescription>{audio.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-between">
+                  <Button size="sm"><Headphones className="w-3 h-3 mr-1" /> Listen</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDeleteResource("audio", audio.id)} className="text-red-600">
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
+          {/* Articles Section */}
+          <TabsContent value="articles" className="mt-6">
+            {resources.articles.map((article) => (
+              <Card key={article.id}>
+                <CardHeader>
+                  <CardTitle>{article.title}</CardTitle>
+                  <CardDescription>{article.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-between">
+                  <Button size="sm"><BookOpen className="w-3 h-3 mr-1" /> Read</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDeleteResource("articles", article.id)} className="text-red-600">
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+</TabsContent>
 
           <TabsContent value="messages" className="space-y-6">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">

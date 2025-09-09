@@ -1,17 +1,46 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { MessageCircle, Send, Heart, ArrowLeft, Phone, AlertTriangle, Lightbulb, Users, Calendar } from "lucide-react"
+import {
+  MessageCircle,
+  Send,
+  Heart,
+  ArrowLeft,
+  Phone,
+  AlertTriangle,
+  Lightbulb,
+  Users,
+  Calendar,
+} from "lucide-react"
+
+// deterministic formatter — always returns e.g. "09:08 PM"
+function formatTime(date: Date | string | number) {
+  const d = typeof date === "object" ? (date as Date) : new Date(date)
+  const hours = d.getHours()
+  const minutes = d.getMinutes()
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12
+  const ampm = hours >= 12 ? "PM" : "AM"
+  const hh = String(hour12).padStart(2, "0")
+  const mm = String(minutes).padStart(2, "0")
+  return `${hh}:${mm} ${ampm}`
+}
+
+type Message = {
+  id: number
+  type: "ai" | "user"
+  content: string
+  timestamp: Date | string | number
+}
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
-      id: 1,
+      id: Date.now(),
       type: "ai",
       content: "Hello! I'm here to provide support and guidance. How are you feeling today?",
       timestamp: new Date(),
@@ -19,6 +48,50 @@ export default function ChatPage() {
   ])
   const [inputMessage, setInputMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+
+  // Scrolling refs & state
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const [isUserAtBottom, setIsUserAtBottom] = useState(true)
+  const [newMessagesCount, setNewMessagesCount] = useState(0)
+  const SCROLL_THRESHOLD = 120 // px — how close to bottom we treat as "at bottom"
+
+  useEffect(() => {
+    // When messages change: if user is at bottom -> auto scroll; otherwise increase new message badge
+    if (isUserAtBottom) {
+      scrollToBottom({ behavior: "smooth" })
+      setNewMessagesCount(0)
+    } else {
+      setNewMessagesCount((c) => c + 1)
+    }
+  }, [messages])
+
+  useEffect(() => {
+    // If typing appears from AI and user is at bottom, scroll so typing indicator is visible
+    if (isTyping && isUserAtBottom) {
+      scrollToBottom({ behavior: "smooth" })
+    }
+  }, [isTyping, isUserAtBottom])
+
+  const scrollToBottom = (opts?: ScrollIntoViewOptions) => {
+    const el = containerRef.current
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: (opts && opts.behavior) as ScrollBehavior })
+    } else {
+      messagesEndRef.current?.scrollIntoView(opts)
+    }
+  }
+
+  const onMessagesScroll = () => {
+    const el = containerRef.current
+    if (!el) return
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    const atBottom = distanceFromBottom <= SCROLL_THRESHOLD
+    setIsUserAtBottom(atBottom)
+    if (atBottom) {
+      setNewMessagesCount(0)
+    }
+  }
 
   const quickSuggestions = [
     "I'm feeling anxious about exams",
@@ -28,12 +101,13 @@ export default function ChatPage() {
   ]
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return
+    if (!inputMessage.trim() || isTyping) return
 
-    const userMessage = {
-      id: messages.length + 1,
+    const trimmed = inputMessage.trim()
+    const userMessage: Message = {
+      id: Date.now(),
       type: "user",
-      content: inputMessage,
+      content: trimmed,
       timestamp: new Date(),
     }
 
@@ -43,15 +117,17 @@ export default function ChatPage() {
 
     // Simulate AI response
     setTimeout(() => {
-      const aiResponse = {
-        id: messages.length + 2,
-        type: "ai",
-        content: getAIResponse(inputMessage),
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, aiResponse])
-      setIsTyping(false)
-    }, 1500)
+      setMessages((prev) => {
+        const aiResponse: Message = {
+          id: Date.now() + 1,
+          type: "ai",
+          content: getAIResponse(trimmed),
+          timestamp: new Date(),
+        }
+        setIsTyping(false)
+        return [...prev, aiResponse]
+      })
+    }, 1200)
   }
 
   const getAIResponse = (message: string) => {
@@ -107,6 +183,7 @@ export default function ChatPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Chat Area */}
           <div className="lg:col-span-3">
+            {/* Keep the Card's height fixed and allow its children to flex */}
             <Card className="h-[600px] flex flex-col">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
@@ -121,15 +198,26 @@ export default function ChatPage() {
                 </div>
               </CardHeader>
 
-              <CardContent className="flex-1 flex flex-col">
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+              {/* IMPORTANT: add min-h-0 so the flex child can shrink and allow internal scrolling */}
+              <CardContent className="flex-1 flex flex-col min-h-0">
+                {/* Messages (scrollable). Use containerRef for scroll handling */}
+             <div
+  ref={containerRef}
+  onScroll={onMessagesScroll}
+  className="flex-1 overflow-y-auto space-y-4 mb-4 pr-3 hide-scrollbar"
+  style={{ WebkitOverflowScrolling: "touch", paddingBottom: 12 }}
+>
+
                   {messages.map((message) => (
                     <div
                       key={message.id}
                       className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
                     >
-                      <div className={`flex gap-3 max-w-[80%] ${message.type === "user" ? "flex-row-reverse" : ""}`}>
+                      <div
+                        className={`flex gap-3 max-w-[80%] ${
+                          message.type === "user" ? "flex-row-reverse" : ""
+                        }`}
+                      >
                         <Avatar className="w-8 h-8">
                           <AvatarFallback
                             className={message.type === "ai" ? "bg-primary text-primary-foreground" : "bg-muted"}
@@ -137,15 +225,16 @@ export default function ChatPage() {
                             {message.type === "ai" ? "AI" : "You"}
                           </AvatarFallback>
                         </Avatar>
+
+                        {/* Message bubble: ensure wrapping and no overflow */}
                         <div
-                          className={`rounded-lg p-3 ${
+                          className={`rounded-lg p-3 break-words whitespace-pre-wrap ${
                             message.type === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                           }`}
+                          style={{ wordBreak: "break-word" }}
                         >
                           <p className="text-sm">{message.content}</p>
-                          <p className="text-xs opacity-70 mt-1">
-                            {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </p>
+                          <p className="text-xs opacity-70 mt-1">{formatTime(message.timestamp)}</p>
                         </div>
                       </div>
                     </div>
@@ -157,23 +246,37 @@ export default function ChatPage() {
                         <Avatar className="w-8 h-8">
                           <AvatarFallback className="bg-primary text-primary-foreground">AI</AvatarFallback>
                         </Avatar>
-                        <div className="rounded-lg p-3 bg-muted">
+                        <div className="rounded-lg p-3 bg-muted break-words whitespace-pre-wrap" style={{ wordBreak: "break-word" }}>
                           <div className="flex space-x-1">
                             <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                            <div
-                              className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                              style={{ animationDelay: "0.1s" }}
-                            ></div>
-                            <div
-                              className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                              style={{ animationDelay: "0.2s" }}
-                            ></div>
+                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
+
+                  {/* scroll anchor in case containerRef missing */}
+                  <div ref={messagesEndRef} />
                 </div>
+
+                {/* "New messages" badge - appears when user scrolled up and new messages arrived */}
+                {newMessagesCount > 0 && (
+                  <div className="flex justify-center mb-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        scrollToBottom({ behavior: "smooth" })
+                        setNewMessagesCount(0)
+                        setIsUserAtBottom(true)
+                      }}
+                    >
+                      {newMessagesCount} new message{newMessagesCount > 1 ? "s" : ""} • Jump to latest
+                    </Button>
+                  </div>
+                )}
 
                 {/* Quick Suggestions */}
                 {messages.length === 1 && (
@@ -201,7 +304,7 @@ export default function ChatPage() {
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     placeholder="Type your message..."
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                     className="flex-1"
                   />
                   <Button onClick={handleSendMessage} disabled={!inputMessage.trim() || isTyping}>
@@ -226,9 +329,9 @@ export default function ChatPage() {
                 <p className="text-xs text-muted-foreground mb-3">
                   If you're in immediate danger or having thoughts of self-harm
                 </p>
-                <Button variant="destructive" size="sm" className="w-full">
+                <Button variant="destructive" size="sm" className="w-full" onClick={() => (window.location.href = "tel:112")}>
                   <Phone className="w-3 h-3 mr-2" />
-                  Call 988
+                  Call 112
                 </Button>
               </CardContent>
             </Card>

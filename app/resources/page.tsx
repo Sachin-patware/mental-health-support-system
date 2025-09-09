@@ -10,6 +10,7 @@ import { ArrowLeft, Search, Play, BookOpen, Headphones, Video, Heart, Brain, Moo
 
 export default function ResourcesPage() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("All")
 
   const videoResources = [
     {
@@ -82,10 +83,23 @@ export default function ResourcesPage() {
     },
   ]
 
-  const categories = ["All", "Anxiety", "Depression", "Stress", "Sleep", "Mindfulness", "Relationships"]
+  const categories = ["All", "Anxiety", "Depression", "Stress", "Sleep", "Mindfulness", "Relaxation", "Relationships"]
+
+  // --- Filtering Logic ---
+  const filterResources = (resources: any[]) => {
+    return resources.filter((item) => {
+      const matchesSearch =
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+
+      const matchesCategory = selectedCategory === "All" || item.category === selectedCategory
+      return matchesSearch && matchesCategory
+    })
+  }
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
@@ -101,6 +115,7 @@ export default function ResourcesPage() {
         </div>
       </header>
 
+      {/* Content */}
       <div className="container mx-auto px-4 py-8">
         {/* Search and Filter */}
         <div className="mb-8">
@@ -118,8 +133,9 @@ export default function ResourcesPage() {
             {categories.map((category) => (
               <Badge
                 key={category}
-                variant="outline"
+                variant={selectedCategory === category ? "default" : "outline"}
                 className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                onClick={() => setSelectedCategory(category)}
               >
                 {category}
               </Badge>
@@ -127,29 +143,27 @@ export default function ResourcesPage() {
           </div>
         </div>
 
+        {/* Tabs */}
         <Tabs defaultValue="videos" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="videos" className="flex items-center gap-2">
-              <Video className="w-4 h-4" />
-              Videos
+              <Video className="w-4 h-4" /> Videos
             </TabsTrigger>
             <TabsTrigger value="audio" className="flex items-center gap-2">
-              <Headphones className="w-4 h-4" />
-              Audio
+              <Headphones className="w-4 h-4" /> Audio
             </TabsTrigger>
             <TabsTrigger value="articles" className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              Articles
+              <BookOpen className="w-4 h-4" /> Articles
             </TabsTrigger>
             <TabsTrigger value="tools" className="flex items-center gap-2">
-              <Brain className="w-4 h-4" />
-              Tools
+              <Brain className="w-4 h-4" /> Tools
             </TabsTrigger>
           </TabsList>
 
+          {/* Videos */}
           <TabsContent value="videos" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videoResources.map((video) => (
+              {filterResources(videoResources).map((video) => (
                 <Card key={video.id} className="group hover:shadow-lg transition-shadow">
                   <div className="relative">
                     <img
@@ -181,9 +195,10 @@ export default function ResourcesPage() {
             </div>
           </TabsContent>
 
+          {/* Audio */}
           <TabsContent value="audio" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {audioResources.map((audio) => (
+              {filterResources(audioResources).map((audio) => (
                 <Card key={audio.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center justify-between mb-2">
@@ -204,9 +219,10 @@ export default function ResourcesPage() {
             </div>
           </TabsContent>
 
+          {/* Articles */}
           <TabsContent value="articles" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {articles.map((article) => (
+              {filterResources(articles).map((article) => (
                 <Card key={article.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                   <CardHeader>
                     <div className="flex items-center justify-between mb-2">
@@ -227,6 +243,7 @@ export default function ResourcesPage() {
             </div>
           </TabsContent>
 
+          {/* Tools */}
           <TabsContent value="tools" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card className="hover:shadow-lg transition-shadow cursor-pointer">

@@ -115,6 +115,69 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+
+/* Customizable values (tweak if needed) */
+:root{
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(34,197,94,0.9);        /* default thumb (greenish) */
+  --scrollbar-thumb-hover: rgba(34,197,94,1);    /* hover state */
+  --scrollbar-width: 10px;                       /* width for desktop */
+  --scrollbar-radius: 9999px;
+}
+
+/* Dark mode adjustments (uses your .dark class) */
+.dark {
+  --scrollbar-thumb: rgba(16,185,129,0.9);
+  --scrollbar-thumb-hover: rgba(16,185,129,1);
+}
+
+/* Firefox: thin scrollbar + colors */
+* {
+  scrollbar-width: thin; /* auto | thin | none */
+  /* Firefox accepts 'thumb track' */
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-radius);
+  border: 3px solid transparent;        /* padding effect */
+  background-clip: padding-box;
+  transition: background 150ms ease, transform 120ms ease;
+}
+
+/* Hover / active states */
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  transform: scale(1.02);
+}
+*::-webkit-scrollbar-thumb:active {
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.06);
+}
+
+/* Optional: slightly narrower scrollbar on small screens */
+@media (max-width: 640px) {
+  :root { --scrollbar-width: 8px; }
+}
+
+/* Accessibility note:
+   If you also used a .hide-scrollbar utility earlier, remove it or override it:
+   .hide-scrollbar { -ms-overflow-style: auto; scrollbar-width: thin; }
+*/
+
+
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
