@@ -11,41 +11,42 @@ export default function CrisisSupportPage() {
 
   const crisisResources = [
     {
-      name: "National Suicide Prevention Lifeline",
-      number: "988",
-      description: "24/7 free and confidential support",
-      type: "call",
-    },
-    {
-      name: "Crisis Text Line",
-      number: "741741",
-      description: "Text HOME to 741741",
-      type: "text",
-    },
-    {
-      name: "National Sexual Assault Hotline",
-      number: "1-800-656-4673",
-      description: "24/7 confidential support",
-      type: "call",
-    },
-    {
-      name: "National Domestic Violence Hotline",
-      number: "1-800-799-7233",
-      description: "24/7 confidential support",
-      type: "call",
-    },
+  name: "Vandrevala Foundation Helpline",
+  number: "1860 266 2345 / 9999 666 555",
+  description: "24/7 free mental health support (multi-lingual)",
+  type: "call",
+},
+{
+  name: "iCall (TISS Helpline)",
+  number: "9152987821",
+  description: "Free, confidential mental health counseling (call or WhatsApp)",
+  type: "call/text",
+},
+{
+  name: "AASRA",
+  number: "91-22-27546669 / 91-22-27546667",
+  description: "24/7 suicide prevention and crisis support",
+  type: "call",
+},
+{
+  name: "KIRAN Mental Health Rehabilitation Helpline (Govt. of India)",
+  number: "1800-599-0019",
+  description: "24/7 toll-free national mental health helpline",
+  type: "call",
+}
+
   ]
 
   const campusResources = [
     {
       name: "Campus Counseling Center",
-      contact: "Campus Emergency: 911",
+      contact: "Campus Emergency: 112",
       hours: "24/7 Emergency Support",
       location: "Student Services Building",
     },
     {
       name: "Campus Safety",
-      contact: "Emergency: 911",
+      contact: "Emergency: 112",
       hours: "24/7 Available",
       location: "Security Office",
     },
@@ -91,10 +92,10 @@ export default function CrisisSupportPage() {
                 size="lg"
                 variant="destructive"
                 className="text-lg px-8"
-                onClick={() => handleEmergencyCall("911")}
+                onClick={() => handleEmergencyCall("112")}
               >
                 <Phone className="w-5 h-5 mr-2" />
-                Call 911 Now
+                Call 112 Now
               </Button>
             </div>
           </CardContent>

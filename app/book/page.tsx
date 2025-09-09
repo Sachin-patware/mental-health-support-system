@@ -19,10 +19,11 @@ export default function BookPage() {
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   const counselors = [
-    { id: "1", name: "Dr. Sarah Johnson", specialty: "Anxiety & Depression", rating: 4.9 },
-    { id: "2", name: "Dr. Michael Chen", specialty: "Academic Stress", rating: 4.8 },
-    { id: "3", name: "Dr. Emily Rodriguez", specialty: "Relationship Issues", rating: 4.9 },
-    { id: "4", name: "Dr. David Kim", specialty: "Crisis Support", rating: 5.0 },
+    { id: "1", name: "Dr. Ananya Mehta", specialty: "Anxiety & Depression", rating: 4.9 },
+{ id: "2", name: "Dr. Arjun Iyer", specialty: "Academic Stress", rating: 4.8 },
+{ id: "3", name: "Dr. Riya Kapoor", specialty: "Relationship Issues", rating: 4.9 },
+{ id: "4", name: "Dr. Rajesh Sharma", specialty: "Crisis Support", rating: 5.0 }
+,
   ]
 
   const timeSlots = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"]
